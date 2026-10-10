@@ -1,0 +1,13 @@
+services:
+  db:
+    image: postgres
+    container_name: mais-springsecurity-db
+    environment:
+      POSTGRES_PASSWORD: admin
+    ports:
+      - "5432:5432"
+    volumes:
+      - mais-springsecurity-volume:/var/lib/postgres
+
+volumes:
+  mais-springsecurity-volume:

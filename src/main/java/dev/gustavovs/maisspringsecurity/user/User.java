@@ -1,9 +1,7 @@
 package dev.gustavovs.maisspringsecurity.user;
 
 import dev.gustavovs.maisspringsecurity.commom.BaseEnity;
-import jakarta.persistence.Column;
-import jakarta.persistence.Entity;
-import jakarta.persistence.Table;
+import jakarta.persistence.*;
 import lombok.Getter;
 import lombok.Setter;
 import lombok.ToString;
@@ -31,6 +29,7 @@ public class User extends BaseEnity implements UserDetails{
     @Column(length = 200)
     private String password;
 
+    @Enumerated(EnumType.STRING)
     private UserRole role;
 
     @Override
