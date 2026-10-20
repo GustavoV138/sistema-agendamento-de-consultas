@@ -45,11 +45,12 @@ public class Appointment {
 
     @PrePersist
     public void onCreate() {
-        if(this.id == null){
+        if (this.id == null) {
             this.id = NanoIdUtils.randomNanoId();
         }
-
-        this.situation = AppointmentSituation.ACTIVE;
+        if (this.situation == null) {
+            this.situation = AppointmentSituation.ACTIVE;
+        }
     }
 
     public void addPayment(Payment payment) {
