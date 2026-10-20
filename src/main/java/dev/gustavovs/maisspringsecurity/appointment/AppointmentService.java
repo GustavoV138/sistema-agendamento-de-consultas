@@ -42,14 +42,7 @@ public class AppointmentService {
 
         Appointment saved = appointmentRepository.save(appointment);
 
-        return new AppointmentResponseDTO(
-                saved.getTitle(),
-                saved.getDescription(),
-                saved.getStartAppointment().format(dateFormatter()),
-                saved.getEndAppointment().format(dateFormatter()),
-                saved.getSituation().toString(),
-                saved.getPatient().getName(),
-                saved.getPatient().getPhoneNumber());
+        return toAppointmentResponse(saved);
     }
 
     // Start of Filters
@@ -100,9 +93,9 @@ public class AppointmentService {
 
 
     private void verifyDateAvailability(LocalDateTime startAppointment) {
-        Optional<Appointment> byStartAppointment = appointmentRepository.findByStartAppointment(startAppointment.plusHours(1), startAppointment);
+        Optional<Appointment> byStartAppointment = appointmentRepository.findByStartAppointment(startAppointment.minusHours(1), startAppointment);
 
-        if(byStartAppointment.isPresent()) throw new RuntimeException("Scheduled appointment time is already in use."); // Should throw AppointmentStartTimeNotAvailableException
+        if(byStartAppointment.isPresent()) throw new RuntimeException("Scheduled appointment time is already in use. Try another one."); // Should throw AppointmentStartTimeNotAvailableException
     }
 
     private List<AppointmentResponseDTO> findAllAppointmentsBySituation(AppointmentSituation situation) {
@@ -114,7 +107,7 @@ public class AppointmentService {
     }
 
     private DateTimeFormatter dateFormatter() {
-        return DateTimeFormatter.ofPattern("dd/MM/yyyy");
+        return DateTimeFormatter.ofPattern("hh:mm - dd/MM/yyyy");
     }
 
     private AppointmentResponseDTO toAppointmentResponse(Appointment appointment) {
@@ -122,8 +115,8 @@ public class AppointmentService {
                 appointment.getTitle(),
                 appointment.getDescription(),
                 appointment.getStartAppointment().format(dateFormatter()),
-                appointment.getEndAppointment().format(dateFormatter()),
-                appointment.getSituation().getSituation(),
+                null,
+                appointment.getSituation().toString(),
                 appointment.getPatient().getName(),
                 appointment.getPatient().getPhoneNumber()
         );

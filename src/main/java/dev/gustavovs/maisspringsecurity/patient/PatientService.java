@@ -21,12 +21,10 @@ public class PatientService {
 
     public Patient createPatient(PatientRequestDTO request) {
 
-        if(verifyBeforeCreate(request)) {
-            Patient patientFound = findPatientByPhoneNumber(request.phoneNumber()).stream()
-                    .filter(p -> p.getName().equalsIgnoreCase(request.name()))
-                    .filter(p -> p.getBirthday().equals(request.birthday()))
-                    .findFirst()
-                    .get();
+        Optional<Patient> patientFoundAfterVerify = verifyBeforeCreatePatient(request);
+
+        if(patientFoundAfterVerify.isPresent()) {
+            Patient patientFound = patientFoundAfterVerify.get();
 
             return patientFound;
         }
@@ -40,12 +38,20 @@ public class PatientService {
         return patientRepository.save(patient);
     }
 
-    private boolean verifyBeforeCreate(PatientRequestDTO request) {
+    private Optional<Patient> verifyBeforeCreatePatient(PatientRequestDTO request) {
 
-        List<Patient> byPhoneNumber = findPatientByPhoneNumber(request.phoneNumber());
+        List<Patient> byPhoneNumber = patientRepository.findByPhoneNumber(request.phoneNumber());
 
-        return byPhoneNumber.stream()
+        boolean patientIsFound = byPhoneNumber.stream()
                 .anyMatch(p -> p.getName().equalsIgnoreCase(request.name()) && p.getBirthday().equals(request.birthday()));
+
+        if(patientIsFound) {
+            return byPhoneNumber.stream()
+                    .filter(p -> p.getName().equalsIgnoreCase(request.name()) && p.getBirthday().equals(request.birthday()))
+                    .findFirst();
+        }
+
+        return Optional.empty();
     }
 
     public List<Patient> findPatientByPhoneNumber(String phoneNumber) {
