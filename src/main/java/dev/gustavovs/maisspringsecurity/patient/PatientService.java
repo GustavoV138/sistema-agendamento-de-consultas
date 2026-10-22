@@ -25,7 +25,6 @@ public class PatientService {
 
         if(patientFoundAfterVerify.isPresent()) {
             Patient patientFound = patientFoundAfterVerify.get();
-
             return patientFound;
         }
 
@@ -75,13 +74,13 @@ public class PatientService {
         patientRepository.save(patient);
 
         return new PatientResponseDTO(
+                patient.getId(),
                 patient.getName(),
                 patient.getPhoneNumber(),
-                patient.getBirthday().format(DateTimeFormatter.ofPattern("dd/MM/yyyy")));
+                patient.getBirthday());
     }
 
     public void deletePatient(String id) {
-
         Patient patient = internalFindById(id);
         patientRepository.delete(patient);
     }

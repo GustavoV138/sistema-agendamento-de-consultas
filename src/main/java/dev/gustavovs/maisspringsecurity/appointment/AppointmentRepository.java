@@ -18,7 +18,7 @@ public interface AppointmentRepository extends JpaRepository<Appointment, String
     @Query("SELECT a FROM Appointment a WHERE extract(month FROM a.startAppointment) = :month AND (a.situation = 'ACTIVE' OR a.situation = 'RESCHEDULED')")
     List<Appointment> findAppointmentsOnMonth(@Param("month") int month);
 
-    @Query("SELECT a FROM Appointment a WHERE extract(year FROM a.startAppointment) = :year AND (a.situation = 'ACTIVE' OR a.situation = 'RESCHEDULED')")
+    @Query("SELECT a FROM Appointment a WHERE extract(year FROM a.startAppointment) = :year")
     List<Appointment> findAppointmentsOnYear(@Param("year") int year);
 
     @Query("SELECT a FROM Appointment a WHERE a.startAppointment BETWEEN :initialTime AND :scheduledTime  AND (a.situation = 'ACTIVE' OR a.situation = 'RESCHEDULED')")

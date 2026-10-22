@@ -1,11 +1,15 @@
 package dev.gustavovs.maisspringsecurity.appointment;
 
 import dev.gustavovs.maisspringsecurity.appointment.dto.request.AppointmentRequestDTO;
+import dev.gustavovs.maisspringsecurity.appointment.dto.request.AppointmentUpdateRequestDTO;
 import dev.gustavovs.maisspringsecurity.appointment.dto.response.AppointmentResponseDTO;
 import dev.gustavovs.maisspringsecurity.patient.Patient;
 import dev.gustavovs.maisspringsecurity.patient.PatientService;
 import dev.gustavovs.maisspringsecurity.patient.dto.request.PatientRequestDTO;
+import dev.gustavovs.maisspringsecurity.patient.dto.request.PatientUpdateRequestDTO;
+import dev.gustavovs.maisspringsecurity.patient.dto.response.PatientResponseDTO;
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
 
 import java.time.LocalDateTime;
 import java.time.format.DateTimeFormatter;
@@ -45,25 +49,15 @@ public class AppointmentService {
         return toAppointmentResponse(saved);
     }
 
-    // Start of Filters
+    //>> Start of Filters
 
     // By Situation
-    public List<AppointmentResponseDTO> findAllActiveAppointments() {
-        AppointmentSituation situation = AppointmentSituation.ACTIVE;
+    public List<AppointmentResponseDTO> findAppointmentsBySituation(AppointmentSituation situation) {
+        List<Appointment> bySituation = appointmentRepository.findBySituation(situation);
 
-        return findAllAppointmentsBySituation(situation);
-    }
-
-    public List<AppointmentResponseDTO> findAllCompletedAppointments() {
-        AppointmentSituation situation = AppointmentSituation.COMPLETED;
-
-        return findAllAppointmentsBySituation(situation);
-    }
-
-    public List<AppointmentResponseDTO> findAllRescheduledAppointments() {
-        AppointmentSituation situation = AppointmentSituation.RESCHEDULED;
-
-        return findAllAppointmentsBySituation(situation);
+        return bySituation.stream()
+                .map(this::toAppointmentResponse)
+                .toList();
     }
 
     // By time period
@@ -89,8 +83,29 @@ public class AppointmentService {
                 .map(this::toAppointmentResponse)
                 .toList();
     }
-    // End of Filters
+    //<< End of Filters
 
+    @Transactional
+    public AppointmentResponseDTO updateOnlyAppointmentInfos(String id, AppointmentUpdateRequestDTO request) {
+        Appointment appointmentFound = findByIdInternal(id);
+
+        if (request.title().isPresent()) appointmentFound.setTitle(request.title().get());
+        if (request.description().isPresent()) appointmentFound.setDescription(request.description().get());
+
+        if (request.startAppointment().isPresent()){
+            verifyDateAvailability(request.startAppointment().get());// Change situation
+            appointmentFound.setStartAppointment(request.startAppointment().get());
+            appointmentFound.setSituation(AppointmentSituation.RESCHEDULED);
+        }
+
+        appointmentRepository.save(appointmentFound);
+        return toAppointmentResponse(appointmentFound);
+    }
+
+    public void deleteAppointment (String id) {
+        Appointment byId = findByIdInternal(id);
+        appointmentRepository.delete(byId);
+    }
 
     private void verifyDateAvailability(LocalDateTime startAppointment) {
         Optional<Appointment> byStartAppointment = appointmentRepository.findByStartAppointment(startAppointment.minusHours(1), startAppointment);
@@ -98,23 +113,19 @@ public class AppointmentService {
         if(byStartAppointment.isPresent()) throw new RuntimeException("Scheduled appointment time is already in use. Try another one."); // Should throw AppointmentStartTimeNotAvailableException
     }
 
-    private List<AppointmentResponseDTO> findAllAppointmentsBySituation(AppointmentSituation situation) {
-        List<Appointment> bySituation = appointmentRepository.findBySituation(situation);
+    private Appointment findByIdInternal(String id) {
+        Optional<Appointment> byId = appointmentRepository.findById(id);
 
-        return bySituation.stream()
-                .map(this::toAppointmentResponse)
-                .toList();
-    }
-
-    private DateTimeFormatter dateFormatter() {
-        return DateTimeFormatter.ofPattern("hh:mm - dd/MM/yyyy");
+        if(byId.isPresent()) return byId.get();
+        else throw new RuntimeException(id + " not found.");
     }
 
     private AppointmentResponseDTO toAppointmentResponse(Appointment appointment) {
         return new AppointmentResponseDTO(
+                appointment.getId(),
                 appointment.getTitle(),
                 appointment.getDescription(),
-                appointment.getStartAppointment().format(dateFormatter()),
+                appointment.getStartAppointment(),
                 null,
                 appointment.getSituation().toString(),
                 appointment.getPatient().getName(),
