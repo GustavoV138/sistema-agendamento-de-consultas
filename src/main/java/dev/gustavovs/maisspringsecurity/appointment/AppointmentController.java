@@ -3,6 +3,7 @@ package dev.gustavovs.maisspringsecurity.appointment;
 import dev.gustavovs.maisspringsecurity.appointment.dto.request.AppointmentRequestDTO;
 import dev.gustavovs.maisspringsecurity.appointment.dto.request.AppointmentUpdateRequestDTO;
 import dev.gustavovs.maisspringsecurity.appointment.dto.response.AppointmentResponseDTO;
+import dev.gustavovs.maisspringsecurity.payment.dto.response.PaymentResponseDTO;
 import jakarta.validation.Valid;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
@@ -16,7 +17,7 @@ public class AppointmentController {
 
     private final AppointmentService appointmentService;
 
-    public AppointmentController(AppointmentService appointmentService) {
+    AppointmentController(AppointmentService appointmentService) {
         this.appointmentService = appointmentService;
     }
 
@@ -25,23 +26,23 @@ public class AppointmentController {
         return ResponseEntity.status(HttpStatus.CREATED).body(appointmentService.createAppointment(request));
     }
 
-    @GetMapping
-    public ResponseEntity<List<AppointmentResponseDTO>> findAppointmentsBySituation(@RequestParam AppointmentSituation situation) {
+    @GetMapping("/{situation}")
+    public ResponseEntity<List<AppointmentResponseDTO>> findAppointmentsBySituation(@PathVariable AppointmentSituation situation) {
         return ResponseEntity.ok(appointmentService.findAppointmentsBySituation(situation));
     }
 
-    @GetMapping("/by/day")
-    public ResponseEntity<List<AppointmentResponseDTO>> findAppointmentsByDay(@RequestParam int day) {
+    @GetMapping("/by/day/{day}")
+    public ResponseEntity<List<AppointmentResponseDTO>> findAppointmentsByDay(@PathVariable int day) {
         return ResponseEntity.ok(appointmentService.findAppointmentsOnDay(day));
     }
 
-    @GetMapping("/by/month")
-    public ResponseEntity<List<AppointmentResponseDTO>> findAppointmentsByMonth(@RequestParam int month) {
+    @GetMapping("/by/month/{month}")
+    public ResponseEntity<List<AppointmentResponseDTO>> findAppointmentsByMonth(@PathVariable int month) {
         return ResponseEntity.ok(appointmentService.findAppointmentsOnMonth(month));
     }
 
-    @GetMapping("/by/year")
-    public ResponseEntity<List<AppointmentResponseDTO>> findAppointmentsByYear(@RequestParam int year) {
+    @GetMapping("/by/year/{year}")
+    public ResponseEntity<List<AppointmentResponseDTO>> findAppointmentsByYear(@PathVariable int year) {
         return ResponseEntity.ok(appointmentService.findAppointmentsOnYear(year));
     }
 
@@ -54,5 +55,17 @@ public class AppointmentController {
     public ResponseEntity<Void> deleteAppointment(@PathVariable String id) {
         appointmentService.deleteAppointment(id);
         return ResponseEntity.status(HttpStatus.NO_CONTENT).build();
+    }
+
+    @PatchMapping("/complete/{id}")
+    public ResponseEntity<Void> markAppointmentAsCompleted(@PathVariable String id){
+        appointmentService.markAppointmentAsCompleted(id);
+        return ResponseEntity.status(HttpStatus.CREATED).build();
+    }
+
+    @GetMapping("/{id}/payments")
+    public ResponseEntity<List<PaymentResponseDTO>> findAllAppointmentPayments(@PathVariable String id) {
+        List<PaymentResponseDTO> response = appointmentService.findAllAppointmentPayments(id);
+        return ResponseEntity.ok(response);
     }
 }

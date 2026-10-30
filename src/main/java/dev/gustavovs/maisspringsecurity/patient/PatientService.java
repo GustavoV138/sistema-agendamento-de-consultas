@@ -15,7 +15,7 @@ public class PatientService {
 
     private final PatientRepository patientRepository;
 
-    public PatientService(PatientRepository patientRepository) {
+    PatientService(PatientRepository patientRepository) {
         this.patientRepository = patientRepository;
     }
 
@@ -37,6 +37,37 @@ public class PatientService {
         return patientRepository.save(patient);
     }
 
+    public List<PatientResponseDTO> findPatientByPhoneNumber(String phoneNumber) {
+
+        List<Patient> patients = patientRepository.findByPhoneNumber(phoneNumber);
+        if (patients.isEmpty())
+            throw new RuntimeException(phoneNumber + " not found."); // Should throw PatientNotFoundException
+
+        return patients.stream()
+                .map(this::toResponseDTO)
+                .toList();
+    }
+
+    @Transactional
+    public PatientResponseDTO updatePatient(String id, PatientUpdateRequestDTO request) {
+
+        Patient patient = internalFindById(id);
+
+        if(request.name().isPresent()) patient.setName(request.name().get());
+        if(request.phoneNumber().isPresent()) patient.setPhoneNumber(request.phoneNumber().get());
+        if(request.birthday().isPresent()) patient.setBirthday(request.birthday().get());
+
+        patientRepository.save(patient);
+
+        return toResponseDTO(patient);
+    }
+
+    public void deletePatient(String id) {
+        Patient patient = internalFindById(id);
+        patientRepository.delete(patient);
+    }
+
+
     private Optional<Patient> verifyBeforeCreatePatient(PatientRequestDTO request) {
 
         List<Patient> byPhoneNumber = patientRepository.findByPhoneNumber(request.phoneNumber());
@@ -53,41 +84,18 @@ public class PatientService {
         return Optional.empty();
     }
 
-    public List<Patient> findPatientByPhoneNumber(String phoneNumber) {
-
-        List<Patient> patients = patientRepository.findByPhoneNumber(phoneNumber);
-        if (patients.isEmpty())
-            throw new RuntimeException(phoneNumber + " not found."); // Should throw PatientNotFoundException
-
-        return patients;
-    }
-
-    @Transactional
-    public PatientResponseDTO updatePatient(String id, PatientUpdateRequestDTO request) {
-
-        Patient patient = internalFindById(id);
-
-        if(request.name().isPresent()) patient.setName(request.name().get());
-        if(request.phoneNumber().isPresent()) patient.setPhoneNumber(request.phoneNumber().get());
-        if(request.birthday().isPresent()) patient.setBirthday(request.birthday().get());
-
-        patientRepository.save(patient);
-
-        return new PatientResponseDTO(
-                patient.getId(),
-                patient.getName(),
-                patient.getPhoneNumber(),
-                patient.getBirthday());
-    }
-
-    public void deletePatient(String id) {
-        Patient patient = internalFindById(id);
-        patientRepository.delete(patient);
-    }
-
     private Patient internalFindById(String id) {
         Optional<Patient> patientById = patientRepository.findById(id);
         if(patientById.isEmpty()) throw new RuntimeException(id + " not found.");
         return patientById.get();
+    }
+
+    private PatientResponseDTO toResponseDTO(Patient patient) {
+        return new PatientResponseDTO(
+                patient.getId(),
+                patient.getName(),
+                patient.getPhoneNumber(),
+                patient.getBirthday()
+        );
     }
 }

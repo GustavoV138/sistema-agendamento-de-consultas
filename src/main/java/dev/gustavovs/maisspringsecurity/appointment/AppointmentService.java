@@ -6,13 +6,13 @@ import dev.gustavovs.maisspringsecurity.appointment.dto.response.AppointmentResp
 import dev.gustavovs.maisspringsecurity.patient.Patient;
 import dev.gustavovs.maisspringsecurity.patient.PatientService;
 import dev.gustavovs.maisspringsecurity.patient.dto.request.PatientRequestDTO;
-import dev.gustavovs.maisspringsecurity.patient.dto.request.PatientUpdateRequestDTO;
-import dev.gustavovs.maisspringsecurity.patient.dto.response.PatientResponseDTO;
+import dev.gustavovs.maisspringsecurity.payment.Payment;
+import dev.gustavovs.maisspringsecurity.payment.dto.response.PaymentResponseDTO;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
 import java.time.LocalDateTime;
-import java.time.format.DateTimeFormatter;
+import java.time.ZoneId;
 import java.util.List;
 import java.util.Optional;
 
@@ -85,6 +85,10 @@ public class AppointmentService {
     }
     //<< End of Filters
 
+    public AppointmentResponseDTO findAppointmentById(String id) {
+        return toAppointmentResponse(findByIdInternal(id));
+    }
+
     @Transactional
     public AppointmentResponseDTO updateOnlyAppointmentInfos(String id, AppointmentUpdateRequestDTO request) {
         Appointment appointmentFound = findByIdInternal(id);
@@ -107,6 +111,29 @@ public class AppointmentService {
         appointmentRepository.delete(byId);
     }
 
+    public void markAppointmentAsCompleted(String id) {
+        Appointment byId = findByIdInternal(id);
+        byId.setSituation(AppointmentSituation.COMPLETED);
+
+        if (byId.getEndAppointment() == null) byId.setEndAppointment(LocalDateTime.now(ZoneId.of("-03:00")));
+        appointmentRepository.save(byId);
+    }
+
+    public List<PaymentResponseDTO> findAllAppointmentPayments(String id) {
+        Appointment byId = findByIdInternal(id);
+
+        List<Payment> payments = byId.getPayments();
+
+        return payments.stream().map(
+                p -> (new PaymentResponseDTO(
+                        p.getId(),
+                        p.getValue(),
+                        p.getPaymentType(),
+                        p.getIsDone()))
+                )
+                .toList();
+    }
+
     private void verifyDateAvailability(LocalDateTime startAppointment) {
         Optional<Appointment> byStartAppointment = appointmentRepository.findByStartAppointment(startAppointment.minusHours(1), startAppointment);
 
@@ -126,7 +153,7 @@ public class AppointmentService {
                 appointment.getTitle(),
                 appointment.getDescription(),
                 appointment.getStartAppointment(),
-                null,
+                appointment.getEndAppointment(),
                 appointment.getSituation().toString(),
                 appointment.getPatient().getName(),
                 appointment.getPatient().getPhoneNumber()
