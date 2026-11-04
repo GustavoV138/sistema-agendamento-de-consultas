@@ -1,12 +1,13 @@
 package dev.gustavovs.maisspringsecurity.patient;
 
+import dev.gustavovs.maisspringsecurity.exception.PatientNotFoundException;
+import dev.gustavovs.maisspringsecurity.exception.PatientPhoneNumberNotFoundException;
 import dev.gustavovs.maisspringsecurity.patient.dto.request.PatientRequestDTO;
 import dev.gustavovs.maisspringsecurity.patient.dto.request.PatientUpdateRequestDTO;
 import dev.gustavovs.maisspringsecurity.patient.dto.response.PatientResponseDTO;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
-import java.time.format.DateTimeFormatter;
 import java.util.List;
 import java.util.Optional;
 
@@ -41,7 +42,7 @@ public class PatientService {
 
         List<Patient> patients = patientRepository.findByPhoneNumber(phoneNumber);
         if (patients.isEmpty())
-            throw new RuntimeException(phoneNumber + " not found."); // Should throw PatientNotFoundException
+            throw new PatientPhoneNumberNotFoundException(phoneNumber);
 
         return patients.stream()
                 .map(this::toResponseDTO)
@@ -86,7 +87,7 @@ public class PatientService {
 
     private Patient internalFindById(String id) {
         Optional<Patient> patientById = patientRepository.findById(id);
-        if(patientById.isEmpty()) throw new RuntimeException(id + " not found.");
+        if(patientById.isEmpty()) throw new PatientNotFoundException(id);
         return patientById.get();
     }
 

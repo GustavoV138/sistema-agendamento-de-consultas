@@ -2,6 +2,8 @@ package dev.gustavovs.maisspringsecurity.payment;
 
 import dev.gustavovs.maisspringsecurity.appointment.Appointment;
 import dev.gustavovs.maisspringsecurity.appointment.AppointmentRepository;
+import dev.gustavovs.maisspringsecurity.exception.AppointmentNotFoundException;
+import dev.gustavovs.maisspringsecurity.exception.PaymentNotFoundException;
 import dev.gustavovs.maisspringsecurity.payment.dto.request.PaymentRequestDTO;
 import dev.gustavovs.maisspringsecurity.payment.dto.request.PaymentUpdateRequestDTO;
 import dev.gustavovs.maisspringsecurity.payment.dto.response.PaymentResponseDTO;
@@ -61,14 +63,14 @@ public class PaymentService {
         Optional<Payment> paymentById = paymentRepository.findById(id);
 
         if (paymentById.isPresent()) return paymentById.get();
-        else throw new RuntimeException(id + " not found.");
+        else throw new PaymentNotFoundException(id);
     }
 
     private Appointment findAppointmentByIdInternal(String id) {
         Optional<Appointment> appointmentById = appointmentRepository.findById(id);
 
         if (appointmentById.isPresent()) return appointmentById.get();
-        else throw new RuntimeException(id + " not found.");
+        else throw new AppointmentNotFoundException(id);
     }
 
     private PaymentResponseDTO toPaymentResponse(Payment payment) {

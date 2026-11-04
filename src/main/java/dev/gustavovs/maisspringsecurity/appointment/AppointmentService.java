@@ -3,6 +3,8 @@ package dev.gustavovs.maisspringsecurity.appointment;
 import dev.gustavovs.maisspringsecurity.appointment.dto.request.AppointmentRequestDTO;
 import dev.gustavovs.maisspringsecurity.appointment.dto.request.AppointmentUpdateRequestDTO;
 import dev.gustavovs.maisspringsecurity.appointment.dto.response.AppointmentResponseDTO;
+import dev.gustavovs.maisspringsecurity.exception.AppointmentNotFoundException;
+import dev.gustavovs.maisspringsecurity.exception.AppointmentStartTimeNotAvailableException;
 import dev.gustavovs.maisspringsecurity.patient.Patient;
 import dev.gustavovs.maisspringsecurity.patient.PatientService;
 import dev.gustavovs.maisspringsecurity.patient.dto.request.PatientRequestDTO;
@@ -137,14 +139,14 @@ public class AppointmentService {
     private void verifyDateAvailability(LocalDateTime startAppointment) {
         Optional<Appointment> byStartAppointment = appointmentRepository.findByStartAppointment(startAppointment.minusHours(1), startAppointment);
 
-        if(byStartAppointment.isPresent()) throw new RuntimeException("Scheduled appointment time is already in use. Try another one."); // Should throw AppointmentStartTimeNotAvailableException
+        if(byStartAppointment.isPresent()) throw new AppointmentStartTimeNotAvailableException();
     }
 
     private Appointment findByIdInternal(String id) {
         Optional<Appointment> byId = appointmentRepository.findById(id);
 
         if(byId.isPresent()) return byId.get();
-        else throw new RuntimeException(id + " not found.");
+        else throw new AppointmentNotFoundException(id);
     }
 
     private AppointmentResponseDTO toAppointmentResponse(Appointment appointment) {

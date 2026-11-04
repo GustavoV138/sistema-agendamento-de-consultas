@@ -35,4 +35,9 @@ public class PaymentController {
         return ResponseEntity.status(HttpStatus.NO_CONTENT).build();
     }
 
+    @PatchMapping("/{id}/confirm")
+    public ResponseEntity<Void> confimrPayment(@PathVariable String id) {
+        paymentService.confirmPayment(id);
+        return ResponseEntity.status(HttpStatus.CREATED).build();
+    }
 }
