@@ -1,7 +1,7 @@
 package dev.gustavovs.maisspringsecurity.auth;
 
 import dev.gustavovs.maisspringsecurity.auth.dto.AuthResponse;
-import dev.gustavovs.maisspringsecurity.commom.exception.EmailAlreadyInUseException;
+import dev.gustavovs.maisspringsecurity.exception.exceptions.EmailAlreadyInUseException;
 import dev.gustavovs.maisspringsecurity.config.TokenConfig;
 import dev.gustavovs.maisspringsecurity.user.User;
 import dev.gustavovs.maisspringsecurity.user.UserRepository;
@@ -34,7 +34,7 @@ public class AuthService {
 
     public AuthResponse register(UserRegisterRequestDTO request) {
         Optional<UserDetails> findUser = userRepository.findByEmail(request.email());
-        if(findUser.isPresent()) throw new EmailAlreadyInUseException("Email already in use.");
+        if(findUser.isPresent()) throw new EmailAlreadyInUseException();
 
         User user = new User();
 

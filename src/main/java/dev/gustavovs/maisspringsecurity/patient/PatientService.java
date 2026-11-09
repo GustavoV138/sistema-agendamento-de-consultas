@@ -1,7 +1,7 @@
 package dev.gustavovs.maisspringsecurity.patient;
 
-import dev.gustavovs.maisspringsecurity.exception.PatientNotFoundException;
-import dev.gustavovs.maisspringsecurity.exception.PatientPhoneNumberNotFoundException;
+import dev.gustavovs.maisspringsecurity.exception.exceptions.PatientNotFoundException;
+import dev.gustavovs.maisspringsecurity.exception.exceptions.PatientPhoneNumberNotFoundException;
 import dev.gustavovs.maisspringsecurity.patient.dto.request.PatientRequestDTO;
 import dev.gustavovs.maisspringsecurity.patient.dto.request.PatientUpdateRequestDTO;
 import dev.gustavovs.maisspringsecurity.patient.dto.response.PatientResponseDTO;

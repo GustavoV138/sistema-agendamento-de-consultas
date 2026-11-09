@@ -2,8 +2,8 @@ package dev.gustavovs.maisspringsecurity.payment;
 
 import dev.gustavovs.maisspringsecurity.appointment.Appointment;
 import dev.gustavovs.maisspringsecurity.appointment.AppointmentRepository;
-import dev.gustavovs.maisspringsecurity.exception.AppointmentNotFoundException;
-import dev.gustavovs.maisspringsecurity.exception.PaymentNotFoundException;
+import dev.gustavovs.maisspringsecurity.exception.exceptions.AppointmentNotFoundException;
+import dev.gustavovs.maisspringsecurity.exception.exceptions.PaymentNotFoundException;
 import dev.gustavovs.maisspringsecurity.payment.dto.request.PaymentRequestDTO;
 import dev.gustavovs.maisspringsecurity.payment.dto.request.PaymentUpdateRequestDTO;
 import dev.gustavovs.maisspringsecurity.payment.dto.response.PaymentResponseDTO;
