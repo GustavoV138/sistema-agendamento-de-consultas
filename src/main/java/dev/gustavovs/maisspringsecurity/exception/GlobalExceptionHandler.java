@@ -74,4 +74,5 @@ public class GlobalExceptionHandler {
         return ResponseEntity.status(exception.getStatusCode()).body(problemDetail);
     }
 
+//    Need implementation: MethodArgumentTypeMismatchException. Similar as method above.
 }

@@ -5,6 +5,7 @@ import org.springframework.data.jpa.repository.Query;
 import org.springframework.data.repository.query.Param;
 import org.springframework.stereotype.Repository;
 
+import java.time.LocalDate;
 import java.time.LocalDateTime;
 import java.util.List;
 import java.util.Optional;
@@ -21,8 +22,12 @@ public interface AppointmentRepository extends JpaRepository<Appointment, String
     @Query("SELECT a FROM Appointment a WHERE extract(year FROM a.startAppointment) = :year")
     List<Appointment> findAppointmentsOnYear(@Param("year") int year);
 
-    @Query("SELECT a FROM Appointment a WHERE a.startAppointment BETWEEN :initialTime AND :scheduledTime  AND (a.situation = 'ACTIVE' OR a.situation = 'RESCHEDULED')")
-    Optional<Appointment> findByStartAppointment(@Param("initialTime") LocalDateTime initialTime, @Param("scheduledTime") LocalDateTime scheduledTime);
+    @Query("SELECT a FROM Appointment a WHERE date(a.startAppointment) = :inputDate")
+    List<Appointment> findByDate(@Param("inputDate") LocalDate inputDate);
+
+    @Query("SELECT a FROM Appointment a WHERE a.startAppointment BETWEEN :hourBeforeStartTime AND :scheduledTime  AND (a.situation = 'ACTIVE' OR a.situation = 'RESCHEDULED')")
+    Optional<Appointment> findByStartAppointment(@Param("hourBeforeStartTime") LocalDateTime hourBeforeStartTime, @Param("scheduledTime") LocalDateTime scheduledTime);
+
 
     List<Appointment> findBySituation(AppointmentSituation situation);
 }

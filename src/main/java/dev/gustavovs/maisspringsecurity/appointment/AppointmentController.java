@@ -5,10 +5,12 @@ import dev.gustavovs.maisspringsecurity.appointment.dto.request.AppointmentUpdat
 import dev.gustavovs.maisspringsecurity.appointment.dto.response.AppointmentResponseDTO;
 import dev.gustavovs.maisspringsecurity.payment.dto.response.PaymentResponseDTO;
 import jakarta.validation.Valid;
+import jakarta.websocket.server.PathParam;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
+import java.time.LocalDate;
 import java.util.List;
 
 @RestController
@@ -26,9 +28,14 @@ public class AppointmentController {
         return ResponseEntity.status(HttpStatus.CREATED).body(appointmentService.createAppointment(request));
     }
 
-    @GetMapping("/{situation}")
-    public ResponseEntity<List<AppointmentResponseDTO>> findAppointmentsBySituation(@PathVariable AppointmentSituation situation) {
+    @GetMapping
+    public ResponseEntity<List<AppointmentResponseDTO>> findAppointmentsBySituation(@PathParam("situation") @RequestParam AppointmentSituation situation) {
         return ResponseEntity.ok(appointmentService.findAppointmentsBySituation(situation));
+    }
+
+    @GetMapping("/by/{inputDate}")
+    public ResponseEntity<List<AppointmentResponseDTO>> findAppointmentByDate(@PathVariable LocalDate inputDate) {
+        return ResponseEntity.ok(appointmentService.findAppointmentByDate(inputDate));
     }
 
     @GetMapping("/by/day/{day}")
@@ -58,9 +65,8 @@ public class AppointmentController {
     }
 
     @PatchMapping("/complete/{id}")
-    public ResponseEntity<Void> markAppointmentAsCompleted(@PathVariable String id){
-        appointmentService.markAppointmentAsCompleted(id);
-        return ResponseEntity.status(HttpStatus.CREATED).build();
+    public ResponseEntity<AppointmentResponseDTO> markAppointmentAsCompleted(@PathVariable String id){
+        return ResponseEntity.status(HttpStatus.CREATED).body(appointmentService.markAppointmentAsCompleted(id));
     }
 
     @GetMapping("/{id}/payments")

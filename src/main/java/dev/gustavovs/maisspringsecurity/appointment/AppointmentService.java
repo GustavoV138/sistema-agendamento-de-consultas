@@ -13,6 +13,7 @@ import dev.gustavovs.maisspringsecurity.payment.dto.response.PaymentResponseDTO;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
+import java.time.LocalDate;
 import java.time.LocalDateTime;
 import java.time.ZoneId;
 import java.util.List;
@@ -63,6 +64,15 @@ public class AppointmentService {
     }
 
     // By time period
+    public List<AppointmentResponseDTO> findAppointmentByDate(LocalDate inputDate) {
+        List<Appointment> appointments = appointmentRepository.findByDate(inputDate);
+
+        return appointments.stream()
+                .map(this::toAppointmentResponse)
+                .toList();
+    }
+
+    // For ACTIVE or RESCHEDULED appointments only
     public List<AppointmentResponseDTO> findAppointmentsOnDay(int day) {
         List<Appointment> appointmentsOnDay = appointmentRepository.findAppointmentsOnDay(day);
 
@@ -87,10 +97,6 @@ public class AppointmentService {
     }
     //<< End of Filters
 
-    public AppointmentResponseDTO findAppointmentById(String id) {
-        return toAppointmentResponse(findByIdInternal(id));
-    }
-
     @Transactional
     public AppointmentResponseDTO updateOnlyAppointmentInfos(String id, AppointmentUpdateRequestDTO request) {
         Appointment appointmentFound = findByIdInternal(id);
@@ -113,12 +119,12 @@ public class AppointmentService {
         appointmentRepository.delete(byId);
     }
 
-    public void markAppointmentAsCompleted(String id) {
+    public AppointmentResponseDTO markAppointmentAsCompleted(String id) {
         Appointment byId = findByIdInternal(id);
         byId.setSituation(AppointmentSituation.COMPLETED);
 
         if (byId.getEndAppointment() == null) byId.setEndAppointment(LocalDateTime.now(ZoneId.of("-03:00")));
-        appointmentRepository.save(byId);
+        return toAppointmentResponse(appointmentRepository.save(byId));
     }
 
     public List<PaymentResponseDTO> findAllAppointmentPayments(String id) {
@@ -126,7 +132,8 @@ public class AppointmentService {
 
         List<Payment> payments = byId.getPayments();
 
-        return payments.stream().map(
+        return payments.stream()
+                .map(
                 p -> (new PaymentResponseDTO(
                         p.getId(),
                         p.getValue(),
