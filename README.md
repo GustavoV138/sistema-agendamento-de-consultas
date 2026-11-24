@@ -20,6 +20,11 @@ API RESTful completa desenvolvida com **Spring Boot 4 / Java 21**, projetada par
 - [Como Executar o Projeto](#-como-executar-o-projeto)
   - [Pré-requisitos](#pré-requisitos)
   - [Passo a Passo](#passo-a-passo)
+- [Demo Pública](#-demo-pública)
+  - [Variáveis de Ambiente](#variáveis-de-ambiente)
+  - [Executando Localmente (Perfil Demo)](#executando-localmente-perfil-demo)
+  - [Deploy no Render](#deploy-no-render)
+  - [Acesso e Credenciais Demo](#acesso-e-credenciais-demo)
 - [Testes](#-testes)
 
 ---
@@ -209,7 +214,7 @@ Todas as requisições exigem cabeçalho `Authorization: Bearer <token>`.
 | Método | Endpoint | Descrição | Status Sucesso |
 | :--- | :--- | :--- | :--- |
 | `GET` | `/patient/{phoneNumber}` | Busca pacientes por número de telefone (11 dígitos) | `200 OK` |
-| `PATCH` | `/patient/{id}` | Atualização parcial dos dados do paciente | `201 Created` |
+| `PATCH` | `/patient/{id}` | Atualização parcial dos dados do paciente | `200 OK` |
 | `DELETE` | `/patient/{id}` | Remove um paciente da base de dados | `204 No Content` |
 
 #### Exemplo de Atualização de Paciente (`PATCH /patient/{id}`):
@@ -233,8 +238,8 @@ Todas as requisições exigem cabeçalho `Authorization: Bearer <token>`.
 | `GET` | `/appointment/by/day/{day}` | Filtra consultas ativas/reagendadas pelo dia do mês | `200 OK` |
 | `GET` | `/appointment/by/month/{month}` | Filtra consultas ativas/reagendadas pelo mês | `200 OK` |
 | `GET` | `/appointment/by/year/{year}` | Filtra consultas pelo ano | `200 OK` |
-| `PATCH` | `/appointment/{id}` | Atualiza título, descrição ou data do agendamento | `201 Created` |
-| `PATCH` | `/appointment/complete/{id}` | Marca consulta como concluída (`COMPLETED`) | `201 Created` |
+| `PATCH` | `/appointment/{id}` | Atualiza título, descrição ou data do agendamento | `200 OK` |
+| `PATCH` | `/appointment/complete/{id}` | Marca consulta como concluída (`COMPLETED`) | `200 OK` |
 | `GET` | `/appointment/{id}/payments` | Lista todos os pagamentos vinculados a essa consulta | `200 OK` |
 | `DELETE` | `/appointment/{id}` | Exclui a consulta e pagamentos em cascata | `204 No Content` |
 
@@ -273,8 +278,8 @@ Todas as requisições exigem cabeçalho `Authorization: Bearer <token>`.
 | Método | Endpoint | Descrição | Status Sucesso |
 | :--- | :--- | :--- | :--- |
 | `POST` | `/payment?appointmentId={appointmentId}` | Registra um pagamento associado a um agendamento | `201 Created` |
-| `PATCH` | `/payment/{id}` | Altera valor ou forma de pagamento | `201 Created` |
-| `PATCH` | `/payment/{id}/confirm` | Marca o pagamento como liquidado (`isDone = true`) | `201 Created` |
+| `PATCH` | `/payment/{id}` | Altera valor ou forma de pagamento | `200 OK` |
+| `PATCH` | `/payment/{id}/confirm` | Marca o pagamento como liquidado (`isDone = true`) | `200 OK` |
 | `DELETE` | `/payment/{id}` | Remove um registro de pagamento | `204 No Content` |
 
 #### Tipos de Pagamento (`paymentType`):
@@ -364,6 +369,63 @@ A API adota o padrão **RFC 7807 (Problem Details)** para formatação de erros:
 5. **Acesse a Documentação Swagger / OpenAPI:**
    - Interface interativa: [http://localhost:8080/swagger-ui/index.html](http://localhost:8080/swagger-ui/index.html)
    - Especificação JSON: [http://localhost:8080/v3/api-docs](http://localhost:8080/v3/api-docs)
+
+---
+
+## 🌐 Demo Pública
+
+Esta aplicação está configurada para deploy como **DEMO pública** no free tier do **Render** (ambiente Docker, 512 MB de RAM, CPU compartilhada).
+
+> [!IMPORTANT]
+> **Aviso sobre Dados da Demo**: No perfil `demo`, o banco de dados opera em memória com H2 (`MODE=PostgreSQL`). Os dados são puramente temporários e **resetados periodicamente a cada 2 horas** (ou a cada reinicialização/despertar do container). Além disso, há um teto de segurança configurável de 500 registros por tabela para assegurar estabilidade.
+
+### Variáveis de Ambiente
+
+| Variável | Obrigatória na Demo | Descrição | Exemplo / Padrão |
+| :--- | :--- | :--- | :--- |
+| `SPRING_PROFILES_ACTIVE` | Sim | Ativa o perfil demo | `demo` |
+| `JWT_SECRET` | Sim (no perfil demo) | Chave secreta HMAC-256 para assinatura dos tokens JWT | Chave aleatória segura |
+| `CORS_ALLOWED_ORIGINS` | Sim | Lista de origens permitidas separadas por vírgula | `https://portfolio.dev,http://localhost:4200` |
+| `PORT` | Não (injetada pelo Render) | Porta HTTP do servidor Spring Boot | `8080` |
+
+> [!WARNING]
+> Se `CORS_ALLOWED_ORIGINS` estiver ausente no perfil `demo`, nenhuma origem terá permissão de acesso e um alerta `WARN` será registrado no log.
+
+### Executando Localmente (Perfil Demo)
+
+Para rodar a aplicação em modo demo em sua máquina local sem precisar de banco PostgreSQL:
+
+- **Linux / macOS:**
+  ```bash
+  JWT_SECRET="minha-chave-secreta-demo-123456" CORS_ALLOWED_ORIGINS="http://localhost:4200" ./mvnw spring-boot:run -Dspring-boot.run.profiles=demo
+  ```
+
+- **Windows (PowerShell):**
+  ```powershell
+  $env:JWT_SECRET="minha-chave-secreta-demo-123456"
+  $env:CORS_ALLOWED_ORIGINS="http://localhost:4200"
+  .\mvnw.cmd spring-boot:run -Dspring-boot.run.profiles=demo
+  ```
+
+### Deploy no Render
+
+O projeto conta com um arquivo Blueprint de infraestrutura como código ([render.yaml](render.yaml)):
+
+1. Crie uma conta ou acesse o painel do [Render](https://render.com/).
+2. Conecte seu repositório Git e crie um **Blueprint Instance**. O Render detectará automaticamente o arquivo `render.yaml`.
+3. Defina a variável `CORS_ALLOWED_ORIGINS` com a URL do seu frontend (ex.: site do portfólio em Angular).
+4. A variável `JWT_SECRET` será gerada automaticamente com valor criptograficamente seguro.
+5. O Render utilizará o `Dockerfile` multi-stage com JRE 21 enxuto, otimizado para o consumo máximo de RAM (70%) e SerialGC.
+6. O health check monitorará automaticamente o endpoint `/health`.
+
+### Acesso e Credenciais Demo
+
+Para realizar testes pela documentação Swagger (`/swagger-ui/index.html`) ou clientes HTTP (Postman, Insomnia, curl), utilize o usuário demo pré-semeado:
+
+- **E-mail**: `demo@portfolio.dev`
+- **Senha**: `demo1234`
+
+Faça a autenticação em `POST /auth/login` e informe o token retornado no botão **Authorize** do Swagger UI com o formato `Bearer <TOKEN>`.
 
 ---
 

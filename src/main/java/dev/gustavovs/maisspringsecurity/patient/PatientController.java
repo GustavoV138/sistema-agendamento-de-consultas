@@ -27,7 +27,7 @@ public class PatientController {
     @PatchMapping("/{id}")
     public ResponseEntity<PatientResponseDTO> updatePatient(@PathVariable String id, @RequestBody PatientUpdateRequestDTO request) {
         PatientResponseDTO response = patientService.updatePatient(id, request);
-        return ResponseEntity.status(HttpStatus.CREATED).body(response);
+        return ResponseEntity.ok(response);
     }
 
     @DeleteMapping("/{id}")

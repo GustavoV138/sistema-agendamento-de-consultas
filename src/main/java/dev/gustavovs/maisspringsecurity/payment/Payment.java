@@ -16,6 +16,7 @@ import java.math.BigDecimal;
 @Table(name = "payment")
 public class Payment extends BaseEnity {
 
+    @Column(name = "\"value\"")
     private BigDecimal value;
 
     @Enumerated(EnumType.STRING)

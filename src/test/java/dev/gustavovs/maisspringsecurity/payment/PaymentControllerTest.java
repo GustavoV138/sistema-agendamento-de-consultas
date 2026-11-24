@@ -66,7 +66,7 @@ class PaymentControllerTest {
     }
 
     @Test
-    public void updatePayment_Success_Returns201() throws Exception {
+    public void updatePayment_Success_Returns200() throws Exception {
         PaymentResponseDTO response = new PaymentResponseDTO("payment_id", BigDecimal.valueOf(32), PaymentType.PIX, false);
 
         when(paymentService.updatePayment(any(String.class), any(PaymentUpdateRequestDTO.class)))
@@ -84,7 +84,7 @@ class PaymentControllerTest {
                         .patch("/payment/payment_id")
                         .contentType(MediaType.APPLICATION_JSON)
                         .content(payload))
-                .andExpect(MockMvcResultMatchers.status().isCreated())
+                .andExpect(MockMvcResultMatchers.status().isOk())
                 .andExpect(MockMvcResultMatchers.jsonPath("$.value").value(BigDecimal.valueOf(32)))
                 .andExpect(MockMvcResultMatchers.jsonPath("$.paymentType").value("PIX"))
                 .andExpect(MockMvcResultMatchers.jsonPath("$.isDone").value(false));
@@ -127,11 +127,11 @@ class PaymentControllerTest {
     }
 
     @Test
-    public void confirmPayment_Success_Returns201() throws Exception{
+    public void confirmPayment_Success_Returns200() throws Exception{
         doNothing().when(paymentService).confirmPayment(any(String.class));
 
         mockMvc.perform(MockMvcRequestBuilders
                 .patch("/payment/payment_id/confirm"))
-                .andExpect(MockMvcResultMatchers.status().isCreated());
+                .andExpect(MockMvcResultMatchers.status().isOk());
     }
 }

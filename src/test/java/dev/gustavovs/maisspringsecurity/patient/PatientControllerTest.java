@@ -55,7 +55,7 @@ class PatientControllerTest {
     }
 
     @Test
-    public void updatePatient_Success_Returns201() throws Exception {
+    public void updatePatient_Success_Returns200() throws Exception {
         PatientResponseDTO response = new PatientResponseDTO("patient_id", "Patient Title Updated", "54321", LocalDate.parse("2001-08-09"));
 
         when(patientService.updatePatient(any(String.class), any(PatientUpdateRequestDTO.class)))
@@ -72,7 +72,7 @@ class PatientControllerTest {
                         .patch("/patient/patient_id")
                         .contentType(MediaType.APPLICATION_JSON)
                         .content(payload))
-                .andExpect(MockMvcResultMatchers.status().isCreated())
+                .andExpect(MockMvcResultMatchers.status().isOk())
                 .andExpect(MockMvcResultMatchers.jsonPath("$.id").value(response.id()))
                 .andExpect(MockMvcResultMatchers.jsonPath("$.name").value(response.name()))
                 .andExpect(MockMvcResultMatchers.jsonPath("$.phoneNumber").value(response.phoneNumber()))

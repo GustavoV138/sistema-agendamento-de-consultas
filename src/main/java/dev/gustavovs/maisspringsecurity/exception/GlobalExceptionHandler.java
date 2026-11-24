@@ -74,5 +74,12 @@ public class GlobalExceptionHandler {
         return ResponseEntity.status(exception.getStatusCode()).body(problemDetail);
     }
 
+    @ExceptionHandler(DemoLimitExceededException.class)
+    public ResponseEntity<ProblemDetail> handleDemoLimitExceededException(DemoLimitExceededException exception) {
+        ProblemDetail problemDetail = ProblemDetail.forStatusAndDetail(org.springframework.http.HttpStatus.TOO_MANY_REQUESTS, exception.getMessage());
+        problemDetail.setTitle("Limite da demo atingido.");
+        return ResponseEntity.status(org.springframework.http.HttpStatus.TOO_MANY_REQUESTS).body(problemDetail);
+    }
+
 //    Need implementation: MethodArgumentTypeMismatchException. Similar as method above.
 }

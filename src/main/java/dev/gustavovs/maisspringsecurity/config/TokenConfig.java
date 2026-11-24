@@ -3,8 +3,9 @@ package dev.gustavovs.maisspringsecurity.config;
 import com.auth0.jwt.JWT;
 import com.auth0.jwt.algorithms.Algorithm;
 import com.auth0.jwt.exceptions.JWTCreationException;
-import com.auth0.jwt.exceptions.JWTVerificationException;
 import dev.gustavovs.maisspringsecurity.user.User;
+import org.springframework.beans.factory.annotation.Value;
+import org.springframework.core.env.Environment;
 import org.springframework.stereotype.Component;
 
 import java.time.Instant;
@@ -14,9 +15,22 @@ import java.time.ZoneOffset;
 @Component
 public class TokenConfig {
 
-    private final String SECRET_KEY = "secret-secret-2-times";
+    private final String secretKey;
+    private final Algorithm algorithm;
 
-    Algorithm algorithm = Algorithm.HMAC256(SECRET_KEY);
+    public TokenConfig(@Value("${jwt.secret:${JWT_SECRET:}}") String secretKey, Environment environment) {
+        if (environment.matchesProfiles("demo")) {
+            if (secretKey == null || secretKey.isBlank()) {
+                throw new IllegalStateException("JWT_SECRET environment variable is required in demo profile!");
+            }
+        }
+        if (secretKey == null || secretKey.isBlank()) {
+            this.secretKey = "secret-secret-2-times";
+        } else {
+            this.secretKey = secretKey;
+        }
+        this.algorithm = Algorithm.HMAC256(this.secretKey);
+    }
 
     public String generateToken(User user) {
         try {
@@ -35,12 +49,12 @@ public class TokenConfig {
     public String validateToken(String token) {
         try {
             return JWT.require(algorithm)
-                    .withIssuer("mais-springsecurity") // Caso dê ruim, tira o withClaim(userId) e tenta denovo. Mas acho que funciona
+                    .withIssuer("mais-springsecurity")
                     .build()
                     .verify(token)
                     .getSubject();
 
-        } catch (JWTVerificationException ex) {
+        } catch (Exception ex) {
             return "";
         }
     }

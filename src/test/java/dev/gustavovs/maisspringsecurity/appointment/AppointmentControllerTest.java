@@ -210,7 +210,7 @@ class AppointmentControllerTest {
     }
 
     @Test
-    public void updateOnlyAppointmentInfos_Success_Returns201() throws Exception {
+    public void updateOnlyAppointmentInfos_Success_Returns200() throws Exception {
         AppointmentResponseDTO response = createValidResponse();
 
         when(appointmentService.updateOnlyAppointmentInfos(anyString(), any(AppointmentUpdateRequestDTO.class)))
@@ -227,7 +227,7 @@ class AppointmentControllerTest {
                         .patch("/appointment/app_id")
                         .contentType(MediaType.APPLICATION_JSON)
                         .content(payload))
-                .andExpect(MockMvcResultMatchers.status().isCreated())
+                .andExpect(MockMvcResultMatchers.status().isOk())
                 .andExpect(MockMvcResultMatchers.jsonPath("$.id").value("app_id"))
                 .andExpect(MockMvcResultMatchers.jsonPath("$.title").value("Appointment Title"));
 
@@ -266,7 +266,7 @@ class AppointmentControllerTest {
     }
 
     @Test
-    public void markAppointmentAsCompleted_Success_Returns201() throws Exception {
+    public void markAppointmentAsCompleted_Success_Returns200() throws Exception {
         AppointmentResponseDTO response = new AppointmentResponseDTO(
                 "app_id",
                 "Appointment Title",
@@ -283,7 +283,7 @@ class AppointmentControllerTest {
 
         mockMvc.perform(MockMvcRequestBuilders
                         .patch("/appointment/complete/app_id"))
-                .andExpect(MockMvcResultMatchers.status().isCreated())
+                .andExpect(MockMvcResultMatchers.status().isOk())
                 .andExpect(MockMvcResultMatchers.jsonPath("$.id").value("app_id"))
                 .andExpect(MockMvcResultMatchers.jsonPath("$.situation").value("COMPLETED"))
                 .andExpect(MockMvcResultMatchers.jsonPath("$.endAppointment").value(LocalDateTime.of(2026, 11, 19, 15, 5)
