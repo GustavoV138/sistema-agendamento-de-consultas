@@ -26,7 +26,7 @@ public class PaymentController {
     @PatchMapping("/{id}")
     public ResponseEntity<PaymentResponseDTO> updatePayment(@PathVariable String id, @RequestBody PaymentUpdateRequestDTO request) {
         PaymentResponseDTO response = paymentService.updatePayment(id, request);
-        return ResponseEntity.status(HttpStatus.CREATED).body(response);
+        return ResponseEntity.ok(response);
     }
 
     @DeleteMapping("/{id}")
@@ -38,6 +38,6 @@ public class PaymentController {
     @PatchMapping("/{id}/confirm")
     public ResponseEntity<Void> confirmPayment(@PathVariable String id) {
         paymentService.confirmPayment(id);
-        return ResponseEntity.status(HttpStatus.CREATED).build();
+        return ResponseEntity.ok().build();
     }
 }

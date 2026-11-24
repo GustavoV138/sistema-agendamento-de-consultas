@@ -1,0 +1,41 @@
+spring:
+  application:
+    name: mais-springsecurity
+  datasource:
+    url: jdbc:h2:mem:demo;MODE=PostgreSQL;DATABASE_TO_LOWER=TRUE;DB_CLOSE_DELAY=-1;NON_KEYWORDS=VALUE
+    driver-class-name: org.h2.Driver
+    username: sa
+    password: ''
+  jpa:
+    open-in-view: false
+    show-sql: false
+    hibernate:
+      ddl-auto: create
+    properties:
+      hibernate:
+        dialect: org.hibernate.dialect.H2Dialect
+  flyway:
+    enabled: false
+
+server:
+  port: ${PORT:8080}
+  forward-headers-strategy: framework
+
+logging:
+  level:
+    root: INFO
+    org.hibernate.SQL: INFO
+    org.hibernate.orm.jdbc.bind: INFO
+
+jwt:
+  secret: ${JWT_SECRET:}
+
+demo:
+  reset:
+    interval-ms: 7200000
+  table-limit:
+    max-records: 500
+
+rate-limit:
+  general: 60
+  auth: 10

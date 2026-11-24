@@ -55,7 +55,7 @@ public class AppointmentController {
 
     @PatchMapping("/{id}")
     public ResponseEntity<AppointmentResponseDTO> updateOnlyAppointmentInfos(@PathVariable String id, @RequestBody AppointmentUpdateRequestDTO request) {
-        return ResponseEntity.status(HttpStatus.CREATED).body(appointmentService.updateOnlyAppointmentInfos(id, request));
+        return ResponseEntity.ok(appointmentService.updateOnlyAppointmentInfos(id, request));
     }
 
     @DeleteMapping("/{id}")
@@ -66,7 +66,7 @@ public class AppointmentController {
 
     @PatchMapping("/complete/{id}")
     public ResponseEntity<AppointmentResponseDTO> markAppointmentAsCompleted(@PathVariable String id){
-        return ResponseEntity.status(HttpStatus.CREATED).body(appointmentService.markAppointmentAsCompleted(id));
+        return ResponseEntity.ok(appointmentService.markAppointmentAsCompleted(id));
     }
 
     @GetMapping("/{id}/payments")
